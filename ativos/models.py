@@ -39,10 +39,16 @@ class Computador(models.Model):
 class Movimentacao(models.Model):
     computador = models.ForeignKey(
         Computador,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='movimentacoes',
+        null=True,
+        blank=True,
     )
-    campo = models.CharField(max_length=100)
+    computador_identificador = models.CharField(max_length=50, blank=True, db_index=True)
+    tipo_acao = models.CharField(max_length=50, blank=True)
+    descricao = models.TextField(blank=True)
+    usuario_responsavel = models.CharField(max_length=150, blank=True)
+    campo = models.CharField(max_length=100, blank=True)
     valor_anterior = models.TextField(blank=True)
     valor_novo = models.TextField(blank=True)
     acao = models.CharField(max_length=100)
@@ -54,7 +60,8 @@ class Movimentacao(models.Model):
         verbose_name_plural = 'Movimentações'
 
     def __str__(self):
-        return f'{self.computador_id} - {self.acao}'
+        computador = self.computador_id or self.computador_identificador or '-'
+        return f'{computador} - {self.acao}'
 
 
 class Planta(models.Model):

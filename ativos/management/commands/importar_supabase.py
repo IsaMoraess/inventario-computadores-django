@@ -1,9 +1,7 @@
-import json
-
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
-from ativos.models import Computador, Movimentacao
+from ativos.models import Computador
 
 
 class Command(BaseCommand):
@@ -59,25 +57,15 @@ class Command(BaseCommand):
                     continue
 
                 dados = self.build_computer_data(registro, row_number)
-                computador, created = Computador.objects.update_or_create(
+                _, created = Computador.objects.update_or_create(
                     id=computador_id,
                     defaults=dados,
                 )
 
                 if created:
                     criados += 1
-                    valor_anterior = ''
                 else:
                     atualizados += 1
-                    valor_anterior = 'Atualizado via Supabase'
-
-                Movimentacao.objects.create(
-                    computador=computador,
-                    campo='registro',
-                    valor_anterior=valor_anterior,
-                    valor_novo=self.serialize_values(dados),
-                    acao='Importação Supabase',
-                )
 
         self.stdout.write(self.style.SUCCESS('Importacao Supabase concluida.'))
         self.stdout.write(f'Criados: {criados}')
@@ -138,6 +126,3 @@ class Command(BaseCommand):
             return Computador.Status.ATIVO
 
         return status
-
-    def serialize_values(self, values):
-        return json.dumps(values, ensure_ascii=False, sort_keys=True)

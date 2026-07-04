@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <section class="metric-grid" aria-label="Indicadores gerais">
+    <article class="metric-card">
+      <span>Total de computadores</span>
+      <strong>{{ cards.total }}</strong>
+    </article>
+    <article class="metric-card metric-success">
+      <span>Ativos</span>
+      <strong>{{ cards.ativos }}</strong>
+    </article>
+    <article class="metric-card metric-warning">
+      <span>Em manutenção</span>
+      <strong>{{ cards.manutencao }}</strong>
+    </article>
+    <article class="metric-card metric-muted">
+      <span>Desligados</span>
+      <strong>{{ cards.desligados }}</strong>
+    </article>
+    <article class="metric-card metric-info">
+      <span>Reservas</span>
+      <strong>{{ cards.reservas }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Total de setores/salas</span>
+      <strong>{{ cards.setores_salas }}</strong>
+    </article>
+    <article class="metric-card metric-danger">
+      <span>Computadores com alerta</span>
+      <strong>{{ cards.alertas }}</strong>
+    </article>
+  </section>
+
+  <section class="chart-grid" aria-label="Gráficos do inventário">
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Computadores por status</h2>
+      </div>
+      <div class="chart-box">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Top salas por quantidade</h2>
+      </div>
+      <div class="chart-box">
+        <canvas id="salasChart"></canvas>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Windows 10 vs Windows 11</h2>
+      </div>
+      <div class="chart-box">
+        <canvas id="windowsChart"></canvas>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h2>Computadores por RAM</h2>
+      </div>
+      <div class="chart-box">
+        <canvas id="ramChart"></canvas>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel table-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Últimas movimentações</h2>
+          <p>8 registros mais recentes do inventário.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Computador</th>
+              <th>Ação</th>
+              <th>Campo</th>
+              <th>De</th>
+              <th>Para</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for movimentacao in ultimas_movimentacoes %}
+              <tr>
+                <td>{{ movimentacao.computador_id }}</td>
+                <td>{{ movimentacao.acao|default:"-" }}</td>
+                <td>{{ movimentacao.campo|default:"-" }}</td>
+                <td>{{ movimentacao.valor_anterior|default:"-"|truncatechars:24 }}</td>
+                <td>{{ movimentacao.valor_novo|default:"-"|truncatechars:24 }}</td>
+                <td>{{ movimentacao.data_hora|date:"d/m/Y H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="empty-state">Nenhuma movimentação registrada.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel table-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Pendências do inventário</h2>
+          <p>{{ total_pendencias }} computador(es) com campos a revisar.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Computador</th>
+              <th>Sala</th>
+              <th>Status</th>
+              <th>Pendência</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in pendencias %}
+              <tr>
+                <td>{{ item.computador.id }}</td>
+                <td>{{ item.computador.sala|default:"Sem sala" }}</td>
+                <td><span class="status-pill">{{ item.computador.status|default:"Não informado" }}</span></td>
+                <td>{{ item.motivos|join:", " }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="empty-state">Nenhuma pendência encontrada.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  {{ chart_data|json_script:"dashboard-chart-data" }}
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="asset-page">
+    <div class="asset-hero">
+      <div>
+        <span class="eyebrow">Ficha do ativo</span>
+        <h2>{{ computador.id }}</h2>
+        <p>{{ computador.sala|default:"Sem sala" }} · {{ computador.usuario|default:"Sem usuario" }}</p>
+      </div>
+      <span class="status-pill {{ status_class }}">{{ computador.status|default:"Nao informado" }}</span>
+    </div>
+
+    <div class="asset-actions">
+      <a class="secondary-button" href="{% url 'mapa' %}">Voltar para o mapa</a>
+      <a class="secondary-button" href="{{ edit_url }}">Editar</a>
+      <a class="secondary-button" href="{{ admin_edit_url }}" target="_blank" rel="noreferrer">Editar no admin</a>
+      <a class="secondary-button" href="{{ qr_code }}" download="qrcode-{{ computador.id }}.png">Baixar QR Code</a>
+    </div>
+
+    <div class="asset-layout">
+      <article class="panel asset-card">
+        <div class="panel-header">
+          <h2>Dados do computador</h2>
+        </div>
+
+        <dl class="asset-definition-grid">
+          <div>
+            <dt>ID</dt>
+            <dd>{{ computador.id }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ computador.status|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Sala</dt>
+            <dd>{{ computador.sala|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Usuario</dt>
+            <dd>{{ computador.usuario|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Sistema</dt>
+            <dd>{{ computador.sistema|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>RAM</dt>
+            <dd>{{ computador.ram|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Processador</dt>
+            <dd>{{ computador.processador|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Armazenamento</dt>
+            <dd>{{ computador.armazenamento|default:"-" }}</dd>
+          </div>
+          <div>
+            <dt>Placa de video</dt>
+            <dd>{{ computador.placa_video|default:"-" }}</dd>
+          </div>
+          <div class="asset-definition-wide">
+            <dt>Observacoes</dt>
+            <dd>{{ computador.observacoes|default:"-"|linebreaksbr }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <aside class="panel asset-qr-card">
+        <div class="panel-header">
+          <div>
+            <h2>QR Code</h2>
+            <p>{{ public_url }}</p>
+          </div>
+        </div>
+        <div class="asset-qr-wrap">
+          <img src="{{ qr_code }}" alt="QR Code do computador {{ computador.id }}">
+        </div>
+      </aside>
+    </div>
+
+    <article class="panel timeline-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Historico de movimentacoes</h2>
+          <p>Alteracoes registradas para este computador.</p>
+        </div>
+      </div>
+
+      <div class="timeline">
+        {% for movimentacao in movimentacoes %}
+          <div class="timeline-item timeline-{{ movimentacao.tipo_acao|default:"edicao" }}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <strong>{{ movimentacao.acao|default:"Movimentacao registrada" }}</strong>
+                <time>{{ movimentacao.data_hora|date:"d/m/Y H:i" }}</time>
+              </div>
+
+              {% if movimentacao.descricao %}
+                <p>{{ movimentacao.descricao }}</p>
+              {% endif %}
+
+              {% if movimentacao.valor_anterior or movimentacao.valor_novo %}
+                <div class="timeline-values">
+                  {% if movimentacao.campo == "posicao" %}
+                    <span>{{ movimentacao.valor_anterior|default:"-" }}</span>
+                    <span>{{ movimentacao.valor_novo|default:"-" }}</span>
+                  {% else %}
+                    <span>{{ movimentacao.valor_anterior|default:"-" }}</span>
+                    <strong>→</strong>
+                    <span>{{ movimentacao.valor_novo|default:"-" }}</span>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="timeline-meta">
+                <span>{{ movimentacao.campo|default:"registro" }}</span>
+                <span>{{ movimentacao.usuario_responsavel|default:"Sistema" }}</span>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-state timeline-empty">Nenhuma movimentacao registrada.</div>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+{% endblock %}

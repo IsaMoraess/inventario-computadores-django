@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="crud-page">
+    <div class="crud-header">
+      <div>
+        <span class="eyebrow">Computadores</span>
+        <h2>{{ form_title }}</h2>
+        <p>Preencha os dados do ativo de TI.</p>
+      </div>
+      <a class="secondary-button" href="{% url 'computador_list' %}">Voltar para lista</a>
+    </div>
+
+    <form class="panel computer-form" method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="form-grid">
+        {% for field in form %}
+          <div class="form-field {% if field.name == 'observacoes' %}form-field-wide{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <small>{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <span class="field-error">{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="form-actions">
+        <button class="secondary-button primary-action" type="submit">{{ submit_label }}</button>
+        {% if computador %}
+          <a class="secondary-button" href="{% url 'detalhe_computador' computador.id %}">Cancelar</a>
+        {% else %}
+          <a class="secondary-button" href="{% url 'computador_list' %}">Cancelar</a>
+        {% endif %}
+      </div>
+    </form>
+  </section>
+{% endblock %}

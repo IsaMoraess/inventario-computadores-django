@@ -1,11 +1,10 @@
 import csv
-import json
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from ativos.models import Computador, Movimentacao
+from ativos.models import Computador
 
 
 class Command(BaseCommand):
@@ -71,27 +70,15 @@ class Command(BaseCommand):
                         continue
 
                     dados = self.build_computer_data(row, line_number)
-                    computador, created = Computador.objects.update_or_create(
+                    _, created = Computador.objects.update_or_create(
                         id=computador_id,
                         defaults=dados,
                     )
 
                     if created:
                         criados += 1
-                        self.create_movement(
-                            computador=computador,
-                            campo='registro',
-                            valor_anterior='',
-                            valor_novo=self.serialize_values(dados),
-                        )
                     else:
                         atualizados += 1
-                        self.create_movement(
-                            computador=computador,
-                            campo='registro',
-                            valor_anterior='Atualizado via CSV',
-                            valor_novo=self.serialize_values(dados),
-                        )
 
         self.stdout.write(self.style.SUCCESS('Importacao CSV concluida.'))
         self.stdout.write(f'Criados: {criados}')
@@ -146,18 +133,6 @@ class Command(BaseCommand):
             return Computador.Status.ATIVO
 
         return status
-
-    def create_movement(self, computador, campo, valor_anterior, valor_novo):
-        Movimentacao.objects.create(
-            computador=computador,
-            campo=campo,
-            valor_anterior=valor_anterior,
-            valor_novo=valor_novo,
-            acao='Importação CSV',
-        )
-
-    def serialize_values(self, values):
-        return json.dumps(values, ensure_ascii=False, sort_keys=True)
 
     def is_empty_row(self, row):
         return not any((value or '').strip() for value in row.values())

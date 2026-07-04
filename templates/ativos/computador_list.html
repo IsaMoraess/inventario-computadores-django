@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="crud-page">
+    <div class="crud-header">
+      <div>
+        <span class="eyebrow">Inventario</span>
+        <h2>Computadores</h2>
+        <p>{{ computadores|length }} computador(es) encontrados.</p>
+      </div>
+      <a class="secondary-button primary-action" href="{% url 'computador_novo' %}">Novo computador</a>
+    </div>
+
+    <form class="filter-panel" method="get">
+      <div class="filter-field filter-search">
+        <label for="q">Busca</label>
+        <input id="q" name="q" type="search" value="{{ busca }}" placeholder="ID, usuario, sala, sistema, RAM ou processador">
+      </div>
+
+      <div class="filter-field">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="">Todos</option>
+          {% for value, label in status_options %}
+            <option value="{{ value }}" {% if status_filtro == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="sala">Sala</label>
+        <select id="sala" name="sala">
+          <option value="">Todas</option>
+          {% for item in salas %}
+            <option value="{{ item }}" {% if sala_filtro == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="sistema">Sistema</label>
+        <select id="sistema" name="sistema">
+          <option value="">Todos</option>
+          {% for item in sistemas %}
+            <option value="{{ item }}" {% if sistema_filtro == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="secondary-button" type="submit">Filtrar</button>
+        <a class="secondary-button" href="{% url 'computador_list' %}">Limpar</a>
+      </div>
+    </form>
+
+    <article class="panel table-panel">
+      <div class="table-wrap">
+        <table class="computer-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Sala</th>
+              <th>Usuario</th>
+              <th>Sistema</th>
+              <th>RAM</th>
+              <th>Processador</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for computador in computadores %}
+              <tr>
+                <td><strong>{{ computador.id }}</strong></td>
+                <td><span class="status-pill">{{ computador.status|default:"-" }}</span></td>
+                <td>{{ computador.sala|default:"-" }}</td>
+                <td>{{ computador.usuario|default:"-" }}</td>
+                <td>{{ computador.sistema|default:"-" }}</td>
+                <td>{{ computador.ram|default:"-" }}</td>
+                <td>{{ computador.processador|default:"-"|truncatechars:42 }}</td>
+                <td>
+                  <div class="row-actions">
+                    <a href="{% url 'detalhe_computador' computador.id %}">Ver detalhes</a>
+                    <a href="{% url 'computador_editar' computador.id %}">Editar</a>
+                    <a class="danger-link" href="{% url 'computador_excluir' computador.id %}">Excluir</a>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" class="empty-state">Nenhum computador encontrado.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+{% endblock %}

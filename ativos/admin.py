@@ -31,7 +31,20 @@ class ComputadorAdmin(admin.ModelAdmin):
 class MovimentacaoAdmin(admin.ModelAdmin):
     list_display = (
         'computador',
+        'computador_identificador',
+        'tipo_acao',
+        'acao',
         'campo',
+        'descricao',
+        'usuario_responsavel',
+        'data_hora',
+    )
+    readonly_fields = (
+        'computador',
+        'computador_identificador',
+        'tipo_acao',
+        'descricao',
+        'usuario_responsavel',
         'valor_anterior',
         'valor_novo',
         'acao',
@@ -39,12 +52,16 @@ class MovimentacaoAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'computador__id',
+        'computador_identificador',
+        'tipo_acao',
+        'descricao',
+        'usuario_responsavel',
         'campo',
         'valor_anterior',
         'valor_novo',
         'acao',
     )
-    list_filter = ('campo', 'acao', 'data_hora')
+    list_filter = ('tipo_acao', 'campo', 'acao', 'usuario_responsavel', 'data_hora')
 
 
 @admin.register(Planta)

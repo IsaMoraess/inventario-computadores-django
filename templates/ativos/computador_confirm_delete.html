@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="crud-page">
+    <div class="crud-header danger-header">
+      <div>
+        <span class="eyebrow">Exclusao</span>
+        <h2>Excluir {{ computador.id }}</h2>
+        <p>Confirme antes de remover este computador do inventario.</p>
+      </div>
+      <a class="secondary-button" href="{% url 'computador_list' %}">Voltar para lista</a>
+    </div>
+
+    <article class="panel delete-card">
+      <div class="delete-summary">
+        <div>
+          <span>ID</span>
+          <strong>{{ computador.id }}</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <strong>{{ computador.status|default:"-" }}</strong>
+        </div>
+        <div>
+          <span>Sala</span>
+          <strong>{{ computador.sala|default:"-" }}</strong>
+        </div>
+        <div>
+          <span>Usuario</span>
+          <strong>{{ computador.usuario|default:"-" }}</strong>
+        </div>
+      </div>
+
+      <form method="post" class="delete-actions">
+        {% csrf_token %}
+        <button class="danger-button" type="submit">Excluir computador</button>
+        <a class="secondary-button" href="{% url 'detalhe_computador' computador.id %}">Cancelar</a>
+      </form>
+    </article>
+  </section>
+{% endblock %}

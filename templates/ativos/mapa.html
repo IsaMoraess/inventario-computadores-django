@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <section
+    class="mapa-page"
+    data-api-url="{% url 'api_computadores' %}"
+    data-reposition-url-template="{% url 'api_reposicionar_computador' '__ID__' %}"
+  >
+    <div class="mapa-toolbar">
+      <div>
+        <h2>Planta da empresa</h2>
+        <p>{{ planta.nome|default:"Nenhuma planta cadastrada" }}</p>
+      </div>
+
+      <div class="mapa-toolbar-actions">
+        <button
+          class="reposition-toggle"
+          id="repositionToggle"
+          type="button"
+          aria-pressed="false"
+        >
+          Modo reposicionar
+        </button>
+
+        <div class="mapa-legend" aria-label="Legenda de status">
+          <span><i class="legend-dot status-ativo"></i>Ativo</span>
+          <span><i class="legend-dot status-manutencao"></i>Manutencao</span>
+          <span><i class="legend-dot status-reserva"></i>Reserva</span>
+          <span><i class="legend-dot status-desligado"></i>Desligado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mapa-layout">
+      <div class="mapa-canvas-panel">
+        {% if planta and planta.imagem %}
+          <div class="mapa-scroll" id="mapaScroll">
+            <div class="mapa-stage" id="mapaStage">
+              <img
+                class="mapa-image"
+                id="mapaImage"
+                src="{{ planta.imagem.url }}"
+                alt="Planta {{ planta.nome }}"
+              >
+              <div class="mapa-markers" id="mapaMarkers" aria-label="Computadores na planta"></div>
+            </div>
+          </div>
+        {% else %}
+          <div class="mapa-empty">
+            <strong>Nenhuma planta ativa encontrada.</strong>
+            <span>Cadastre uma planta no admin para visualizar os computadores no mapa.</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <aside class="mapa-details" id="mapaDetails" aria-live="polite">
+        <div class="details-empty" id="detailsEmpty">
+          <strong>Selecione um computador</strong>
+          <span>Clique em um marcador para ver os dados do ativo.</span>
+        </div>
+
+        <div class="details-content" id="detailsContent" hidden>
+          <div class="details-header">
+            <div>
+              <span class="eyebrow">Computador</span>
+              <h2><a id="detailNomeLink" href="#"><span id="detailNome">-</span></a></h2>
+            </div>
+            <span class="status-pill" id="detailStatus">-</span>
+          </div>
+
+          <dl class="details-list">
+            <div>
+              <dt>Usuario</dt>
+              <dd id="detailUsuario">-</dd>
+            </div>
+            <div>
+              <dt>Sala</dt>
+              <dd id="detailSala">-</dd>
+            </div>
+            <div>
+              <dt>RAM</dt>
+              <dd id="detailRam">-</dd>
+            </div>
+            <div>
+              <dt>Sistema</dt>
+              <dd id="detailSistema">-</dd>
+            </div>
+            <div>
+              <dt>Processador</dt>
+              <dd id="detailProcessador">-</dd>
+            </div>
+            <div>
+              <dt>Armazenamento</dt>
+              <dd id="detailArmazenamento">-</dd>
+            </div>
+            <div>
+              <dt>Placa de video</dt>
+              <dd id="detailPlacaVideo">-</dd>
+            </div>
+            <div>
+              <dt>Posicao X</dt>
+              <dd id="detailX">-</dd>
+            </div>
+            <div>
+              <dt>Posicao Y</dt>
+              <dd id="detailY">-</dd>
+            </div>
+          </dl>
+
+          <div class="qr-box">
+            <span>QR Code</span>
+            <img id="detailQrCode" alt="QR Code do computador">
+          </div>
+
+          <a class="edit-button" id="detailEdit" href="#">Editar</a>
+        </div>
+      </aside>
+    </div>
+
+    <div class="map-tooltip" id="mapTooltip" role="tooltip" hidden></div>
+    <div class="map-toast-container" id="mapToast" aria-live="polite"></div>
+  </section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'js/mapa.js' %}"></script>
+{% endblock %}
