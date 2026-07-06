@@ -323,10 +323,13 @@ def configuracoes(request):
                         'Sincronizacao concluida. '
                         f"Criados: {resultado['criados']}; "
                         f"Atualizados: {resultado['atualizados']}; "
+                        f"Removidos: {resultado['removidos']}; "
                         f"Ignorados: {resultado['ignorados']}; "
                         f"Erros: {resultado['erros']}."
                     ),
                 )
+                for aviso in resultado.get('avisos', [])[:5]:
+                    messages.warning(request, aviso)
             except Exception as error:
                 configuracao_service.registrar_log(
                     request.user,

@@ -1,5 +1,4 @@
 import json
-import re
 from io import StringIO
 
 from django.conf import settings
@@ -10,6 +9,7 @@ from django.db import connection
 from django.utils import timezone
 
 from ativos.models import Computador, ConfiguracaoSistema, LogSistema, Movimentacao, Planta
+from ativos.services.supabase_sync import FONTE_OFICIAL, sincronizar_computadores_supabase
 
 
 STARTED_AT = timezone.now()
@@ -53,15 +53,13 @@ def registrar_log(usuario, acao, resultado):
 
 
 def sincronizar_supabase(usuario=None):
-    output = StringIO()
-    call_command('importar_supabase', stdout=output)
-    texto = output.getvalue().strip()
-
-    criados = _extrair_numero(texto, 'Criados')
-    atualizados = _extrair_numero(texto, 'Atualizados')
-    ignorados = _extrair_numero(texto, 'Ignorados')
-    erros = _extrair_numero(texto, 'Erros')
-    total_processado = criados + atualizados
+    resultado = sincronizar_computadores_supabase()
+    criados = resultado['criados']
+    atualizados = resultado['atualizados']
+    removidos = resultado['removidos']
+    ignorados = resultado['ignorados']
+    erros = resultado['erros']
+    total_processado = criados + atualizados + removidos
     cache.clear()
 
     config = get_config()
@@ -73,24 +71,21 @@ def sincronizar_supabase(usuario=None):
         usuario,
         'Sincronizacao Supabase',
         (
-            f'Fonte: public.computadores; Destino: {Computador._meta.db_table}; '
+            f'Fonte: {FONTE_OFICIAL}; Destino: {Computador._meta.db_table}; '
             f'Criados: {criados}; Atualizados: {atualizados}; '
-            f'Ignorados: {ignorados}; Erros: {erros}; Total processado: {total_processado}'
+            f'Removidos: {removidos}; Ignorados: {ignorados}; '
+            f'Erros: {erros}; Total processado: {total_processado}'
         ),
     )
     return {
         'criados': criados,
         'atualizados': atualizados,
+        'removidos': removidos,
         'ignorados': ignorados,
         'erros': erros,
         'total': total_processado,
-        'saida': texto,
+        'avisos': resultado.get('avisos', []),
     }
-
-
-def _extrair_numero(texto, rotulo):
-    match = re.search(rf'{re.escape(rotulo)}:\s*(\d+)', texto)
-    return int(match.group(1)) if match else 0
 
 
 def exportar_banco_json(usuario=None):

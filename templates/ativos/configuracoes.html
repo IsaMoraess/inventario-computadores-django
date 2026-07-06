@@ -46,7 +46,7 @@
       <section class="section-card config-card">
         <span class="eyebrow">Sincronizacao com Supabase</span>
         <h3>Atualizar computadores</h3>
-        <p>A tabela <strong>public.computadores</strong> e a fonte de sincronizacao. Os dados sao importados para o model Computador sem apagar registros existentes.</p>
+        <p>A tabela <strong>public.computadores</strong> e a fonte oficial. Os dados sao sincronizados para o cadastro local de computadores, corrigindo renomeacoes conhecidas sem alterar chave primaria diretamente.</p>
         <div class="config-kpi">
           <span>Ultima sincronizacao</span>
           <strong>{{ configuracao.ultima_sincronizacao|date:"d/m/Y H:i"|default:"Nunca executada" }}</strong>
@@ -55,7 +55,7 @@
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="action" value="sincronizar_supabase">
-          <button class="secondary-button primary-action" type="submit">Sincronizar dados da tabela computadores</button>
+          <button class="secondary-button primary-action" type="submit">Sincronizar dados do Supabase</button>
         </form>
       </section>
 
