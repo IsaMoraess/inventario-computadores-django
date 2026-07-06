@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="config-page">
+    <div class="section-card config-hero">
+      <div>
+        <span class="eyebrow">Central do sistema</span>
+        <h2>Configuracoes e automacoes</h2>
+        <p>Dados da empresa, Supabase, backups, logs, cache, seguranca e administracao em um unico painel.</p>
+      </div>
+      <div class="config-status-pill">
+        <span>Banco</span>
+        <strong>{% if sistema.banco_conectado %}Conectado{% else %}Indisponivel{% endif %}</strong>
+      </div>
+    </div>
+
+    <div class="config-grid">
+      <section class="section-card config-card config-card-wide">
+        <div class="config-card-header">
+          <div>
+            <span class="eyebrow">Dados da empresa</span>
+            <h3>Identidade do sistema</h3>
+          </div>
+          {% if configuracao.logo %}
+            <img class="config-logo-preview" src="{{ configuracao.logo.url }}" alt="{{ configuracao.nome_empresa }}">
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="config-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="salvar_configuracoes">
+          <div class="form-grid">
+            {% for field in form %}
+              <div class="form-field {% if field.name == 'rodape_pdfs' or field.name == 'app_public_url' %}form-field-wide{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+          <button class="secondary-button primary-action" type="submit">Salvar configuracoes</button>
+        </form>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Sincronizacao com Supabase</span>
+        <h3>Atualizar computadores</h3>
+        <p>A tabela <strong>public.computadores</strong> e a fonte de sincronizacao. Os dados sao importados para o model Computador sem apagar registros existentes.</p>
+        <div class="config-kpi">
+          <span>Ultima sincronizacao</span>
+          <strong>{{ configuracao.ultima_sincronizacao|date:"d/m/Y H:i"|default:"Nunca executada" }}</strong>
+          <small>{{ configuracao.ultima_sincronizacao_total }} registros processados na ultima execucao.</small>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="sincronizar_supabase">
+          <button class="secondary-button primary-action" type="submit">Sincronizar dados da tabela computadores</button>
+        </form>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Backup</span>
+        <h3>Exportacao e importacao</h3>
+        <div class="config-actions-stack">
+          <a class="secondary-button" href="{% url 'configuracoes_exportar_banco' %}">Exportar Banco (.json)</a>
+          <a class="secondary-button" href="{% url 'configuracoes_exportar_configuracoes' %}">Exportar configuracoes</a>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="config-upload-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="importar_banco">
+          <label for="arquivo_json">Importar Banco (.json)</label>
+          <input class="form-control" id="arquivo_json" name="arquivo_json" type="file" accept=".json,application/json">
+          <button class="secondary-button" type="submit">Importar arquivo</button>
+        </form>
+      </section>
+
+      <section class="section-card config-card config-card-wide">
+        <span class="eyebrow">Sistema</span>
+        <h3>Saude operacional</h3>
+        <div class="config-metrics">
+          <div><span>Versao</span><strong>{{ sistema.versao }}</strong></div>
+          <div><span>Computadores</span><strong>{{ sistema.computadores }}</strong></div>
+          <div><span>Plantas</span><strong>{{ sistema.plantas }}</strong></div>
+          <div><span>Movimentacoes</span><strong>{{ sistema.movimentacoes }}</strong></div>
+          <div><span>Ultimo backup</span><strong>{{ sistema.ultimo_backup|date:"d/m/Y H:i"|default:"-" }}</strong></div>
+          <div><span>Tempo online</span><strong>{{ sistema.tempo_online }}</strong></div>
+        </div>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Cache</span>
+        <h3>Manutencao rapida</h3>
+        <div class="config-actions-stack">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="limpar_cache">
+            <button class="secondary-button" type="submit">Limpar cache</button>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="recarregar_estatisticas">
+            <button class="secondary-button" type="submit">Recarregar estatisticas</button>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="validar_sistema">
+            <button class="secondary-button" type="submit">Rodar python manage.py check</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Seguranca</span>
+        <h3>Acessos</h3>
+        <div class="config-metrics compact">
+          <div><span>Usuarios online</span><strong>{{ seguranca.usuarios_online }}</strong></div>
+          <div><span>Ultimo login</span><strong>{% if seguranca.ultimo_login %}{{ seguranca.ultimo_login.username }}<br>{{ seguranca.ultimo_login.last_login|date:"d/m/Y H:i" }}{% else %}-{% endif %}</strong></div>
+          <div><span>Tentativas de login</span><strong>{{ seguranca.tentativas_login }}</strong></div>
+        </div>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Interface</span>
+        <h3>Tema visual</h3>
+        <p>As cores e a logo acima ja sao aplicadas no menu, login, QR Codes, PDFs e Excel.</p>
+        <div class="config-swatches">
+          <span style="background: {{ configuracao.cor_principal }}"></span>
+          <span style="background: {{ configuracao.cor_secundaria }}"></span>
+          <span style="background: {{ configuracao.cor_cards }}"></span>
+        </div>
+      </section>
+
+      <section class="section-card config-card">
+        <span class="eyebrow">Administracao</span>
+        <h3>Atalhos</h3>
+        <div class="config-actions-stack">
+          {% if user.is_staff %}
+            <a class="secondary-button" href="{% url 'admin:auth_user_add' %}">Criar usuario</a>
+            <a class="secondary-button" href="{% url 'admin:auth_group_changelist' %}">Editar grupos</a>
+            <a class="secondary-button primary-action" href="{% url 'admin:index' %}">Abrir Admin</a>
+          {% else %}
+            <p>Seu usuario tem permissao de configuracoes, mas precisa de is_staff para abrir o Admin.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="section-card config-card config-card-wide">
+        <span class="eyebrow">Logs</span>
+        <h3>Ultimas automacoes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Usuario</th>
+                <th>Acao</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+                <tr>
+                  <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
+                  <td>{{ log.usuario|default:"Sistema" }}</td>
+                  <td>{{ log.acao }}</td>
+                  <td>{{ log.resultado }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4">Nenhum log registrado ainda.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </section>
+{% endblock %}

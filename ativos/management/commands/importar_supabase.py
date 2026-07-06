@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 
 from ativos.models import Computador
 
@@ -36,6 +36,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         criados = 0
         atualizados = 0
+        ignorados = 0
+        erros = 0
 
         try:
             registros = self.fetch_supabase_records()
@@ -44,32 +46,54 @@ class Command(BaseCommand):
                 f'Erro ao ler public.computadores: {type(error).__name__}: {error}'
             ) from error
 
-        with transaction.atomic():
-            for row_number, registro in enumerate(registros, start=1):
-                computador_id = self.clean_value(registro.get('id'))
+        for row_number, registro in enumerate(registros, start=1):
+            computador_id = self.clean_value(registro.get('id'))
 
-                if not computador_id:
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f'Registro {row_number} ignorado: campo id vazio.'
-                        )
+            if not computador_id:
+                ignorados += 1
+                self.stdout.write(
+                    self.style.WARNING(
+                        f'Registro {row_number} ignorado: campo id vazio.'
                     )
-                    continue
+                )
+                continue
 
+            try:
                 dados = self.build_computer_data(registro, row_number)
-                _, created = Computador.objects.update_or_create(
-                    id=computador_id,
-                    defaults=dados,
+
+                with transaction.atomic():
+                    computador = Computador.objects.filter(pk=computador_id).first()
+
+                    if computador:
+                        for field, value in dados.items():
+                            setattr(computador, field, value)
+                        computador.save(update_fields=[*dados.keys(), 'atualizado_em'])
+                        atualizados += 1
+                    else:
+                        Computador.objects.create(id=computador_id, **dados)
+                        criados += 1
+            except IntegrityError as error:
+                erros += 1
+                self.stdout.write(
+                    self.style.ERROR(
+                        f'Registro {row_number} ({computador_id}) com erro de integridade: {error}'
+                    )
+                )
+            except Exception as error:
+                erros += 1
+                self.stdout.write(
+                    self.style.ERROR(
+                        f'Registro {row_number} ({computador_id}) com erro: {type(error).__name__}: {error}'
+                    )
                 )
 
-                if created:
-                    criados += 1
-                else:
-                    atualizados += 1
-
         self.stdout.write(self.style.SUCCESS('Importacao Supabase concluida.'))
+        self.stdout.write('Fonte: public.computadores')
+        self.stdout.write(f'Destino: {Computador._meta.db_table}')
         self.stdout.write(f'Criados: {criados}')
         self.stdout.write(f'Atualizados: {atualizados}')
+        self.stdout.write(f'Ignorados: {ignorados}')
+        self.stdout.write(f'Erros: {erros}')
 
     def fetch_supabase_records(self):
         columns = ', '.join(self.fields)

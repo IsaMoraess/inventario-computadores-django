@@ -13,9 +13,15 @@
 
     <div class="asset-actions">
       <a class="secondary-button" href="{% url 'mapa' %}">Voltar para o mapa</a>
-      <a class="secondary-button" href="{{ edit_url }}">Editar</a>
-      <a class="secondary-button" href="{{ admin_edit_url }}" target="_blank" rel="noreferrer">Editar no admin</a>
-      <a class="secondary-button" href="{{ qr_code }}" download="qrcode-{{ computador.id }}.png">Baixar QR Code</a>
+      {% if perms.ativos.change_computador %}
+        <a class="secondary-button" href="{{ edit_url }}">Editar</a>
+      {% endif %}
+      {% if user.is_staff and perms.ativos.can_manage_plantas %}
+        <a class="secondary-button" href="{{ admin_edit_url }}" target="_blank" rel="noreferrer">Editar no admin</a>
+      {% endif %}
+      {% if perms.ativos.can_download_qrcodes %}
+        <a class="secondary-button" href="{% url 'qrcode_png' computador.id %}">Baixar QR Code</a>
+      {% endif %}
     </div>
 
     <div class="asset-layout">

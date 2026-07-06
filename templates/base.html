@@ -7,37 +7,81 @@
   <title>{% block title %}{{ page_title|default:"Dashboard" }} | Gestão de Ativos de TI{% endblock %}</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>
+    :root {
+      --accent: {{ sistema_config.cor_principal|default:"#38bdf8" }};
+      --surface: {{ sistema_config.cor_cards|default:"#111925" }};
+      --surface-strong: {{ sistema_config.cor_secundaria|default:"#162234" }};
+    }
+  </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="theme-{{ sistema_config.tema|default:'escuro' }}">
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="{% url 'dashboard' %}" aria-label="Gestão de Ativos de TI">
-        <span class="brand-mark">JR</span>
+        {% if sistema_config.logo %}
+          <span class="brand-mark brand-logo"><img src="{{ sistema_config.logo.url }}" alt="{{ sistema_config.nome_empresa }}"></span>
+        {% else %}
+          <span class="brand-mark">JR</span>
+        {% endif %}
         <span>
           <strong>Gestão de Ativos de TI</strong>
-          <small>JR Grupo</small>
+          <small>{{ sistema_config.nome_empresa|default:"JR Grupo" }}</small>
         </span>
       </a>
 
       <nav class="sidebar-nav" aria-label="Menu principal">
         <a class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}nav-item-active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
-        <a class="nav-item {% if request.resolver_match.url_name == 'computador_list' or request.resolver_match.url_name == 'computador_novo' or request.resolver_match.url_name == 'computador_editar' or request.resolver_match.url_name == 'computador_excluir' or request.resolver_match.url_name == 'detalhe_computador' %}nav-item-active{% endif %}" href="{% url 'computador_list' %}">Computadores</a>
-        <a class="nav-item {% if request.resolver_match.url_name == 'mapa' %}nav-item-active{% endif %}" href="{% url 'mapa' %}">Planta</a>
-        <a class="nav-item" href="#">Relatórios</a>
-        <a class="nav-item" href="#">QR Codes</a>
-        <a class="nav-item" href="{% url 'admin:index' %}">Admin</a>
+
+        {% if perms.ativos.view_computador %}
+          <a class="nav-item {% if request.resolver_match.url_name == 'computador_list' or request.resolver_match.url_name == 'computador_novo' or request.resolver_match.url_name == 'computador_editar' or request.resolver_match.url_name == 'computador_excluir' or request.resolver_match.url_name == 'detalhe_computador' %}nav-item-active{% endif %}" href="{% url 'computador_list' %}">Computadores</a>
+          <a class="nav-item {% if request.resolver_match.url_name == 'mapa' %}nav-item-active{% endif %}" href="{% url 'mapa' %}">Planta</a>
+        {% endif %}
+
+        {% if perms.ativos.can_manage_plantas %}
+          <a class="nav-item {% if request.resolver_match.url_name == 'gerenciar_plantas' %}nav-item-active{% endif %}" href="{% url 'gerenciar_plantas' %}">Plantas</a>
+        {% endif %}
+
+        {% if perms.ativos.can_download_reports %}
+          <a class="nav-item {% if request.resolver_match.url_name == 'relatorios' or request.resolver_match.url_name == 'relatorio_geral' or request.resolver_match.url_name == 'relatorio_setor' or request.resolver_match.url_name == 'relatorio_alertas' or request.resolver_match.url_name == 'relatorio_movimentacoes' or request.resolver_match.url_name == 'relatorio_excel' %}nav-item-active{% endif %}" href="{% url 'relatorios' %}">Relatórios</a>
+        {% endif %}
+
+        <a class="nav-item {% if request.resolver_match.url_name == 'qrcodes' or request.resolver_match.url_name == 'qrcode_png' or request.resolver_match.url_name == 'qrcode_pdf' or request.resolver_match.url_name == 'qrcodes_zip' or request.resolver_match.url_name == 'qrcodes_folha_impressao' %}nav-item-active{% endif %}" href="{% url 'qrcodes' %}">QR Codes</a>
+
+        {% if user.is_staff and perms.ativos.can_manage_plantas %}
+          <a class="nav-item" href="{% url 'admin:index' %}">Admin</a>
+        {% endif %}
+
+        {% if perms.ativos.can_manage_configuracoes %}
+          <a class="nav-item {% if request.resolver_match.url_name == 'configuracoes' or request.resolver_match.url_name == 'configuracoes_exportar_banco' or request.resolver_match.url_name == 'configuracoes_exportar_configuracoes' %}nav-item-active{% endif %}" href="{% url 'configuracoes' %}">Configuracoes</a>
+        {% endif %}
       </nav>
+
+      {% if user.is_authenticated %}
+        <div class="sidebar-user">
+          <span>Logada como</span>
+          <strong>{{ user.get_full_name|default:user.username }}</strong>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Sair</button>
+          </form>
+        </div>
+      {% endif %}
     </aside>
 
     <div class="main-area">
       <header class="topbar">
         <div>
-          <span class="eyebrow">JR Grupo</span>
+          <span class="eyebrow">{{ sistema_config.nome_empresa|default:"JR Grupo" }}</span>
           <h1>{% block page_heading %}{{ page_title|default:"Dashboard" }}{% endblock %}</h1>
         </div>
         <div class="topbar-meta">
-          <span>Gestão de Ativos de TI</span>
+          {% if user.is_authenticated %}
+            <span>{{ user.get_full_name|default:user.username }}</span>
+          {% else %}
+            <span>Gestão de Ativos de TI</span>
+          {% endif %}
         </div>
       </header>
 

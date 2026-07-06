@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="qrcodes-page">
+    <div class="crud-header">
+      <div>
+        <span class="eyebrow">QR Codes</span>
+        <h2>Central de QR Codes</h2>
+        <p>{{ total }} computador(es) encontrados.</p>
+      </div>
+
+      {% if perms.ativos.can_download_qrcodes %}
+        <div class="qrcode-main-actions">
+          <a class="secondary-button primary-action" href="{% url 'qrcodes_zip' %}?size={{ qr_size }}">Gerar todos os QR Codes</a>
+          <a class="secondary-button" href="{% url 'qrcodes_folha_impressao' %}">Folha para impressão</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <form class="filter-panel qrcode-filter-panel" method="get">
+      <div class="filter-field filter-search">
+        <label for="q">Pesquisa</label>
+        <input id="q" name="q" type="search" value="{{ busca }}" placeholder="ID, usuario, sala ou status">
+      </div>
+
+      <div class="filter-field">
+        <label for="sala">Sala</label>
+        <select id="sala" name="sala">
+          <option value="">Todas</option>
+          {% for item in salas %}
+            <option value="{{ item }}" {% if sala_filtro == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="">Todos</option>
+          {% for value, label in status_options %}
+            <option value="{{ value }}" {% if status_filtro == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="size">Tamanho PNG</label>
+        <input id="size" name="size" type="number" min="320" max="1800" step="20" value="{{ qr_size }}">
+      </div>
+
+      <div class="filter-actions">
+        <button class="secondary-button" type="submit">Filtrar</button>
+        <a class="secondary-button" href="{% url 'qrcodes' %}">Limpar</a>
+      </div>
+    </form>
+
+    <div class="qrcode-grid">
+      {% for item in itens %}
+        <article class="qrcode-card">
+          <div class="qrcode-preview">
+            <img src="{{ item.qr_code }}" alt="QR Code {{ item.computador.id }}">
+          </div>
+
+          <div class="qrcode-card-body">
+            <div class="qrcode-card-header">
+              <div>
+                <span class="eyebrow">Computador</span>
+                <h3>{{ item.computador.id }}</h3>
+              </div>
+              <span class="status-pill">{{ item.computador.status|default:"-" }}</span>
+            </div>
+
+            <dl class="qrcode-meta">
+              <div>
+                <dt>Usuario</dt>
+                <dd>{{ item.computador.usuario|default:"-" }}</dd>
+              </div>
+              <div>
+                <dt>Sala</dt>
+                <dd>{{ item.computador.sala|default:"-" }}</dd>
+              </div>
+            </dl>
+
+            <div class="qrcode-card-actions">
+              <a href="{% url 'qrcode_png' item.computador.id %}?inline=1&size={{ qr_size }}" target="_blank" rel="noreferrer">Visualizar</a>
+              {% if perms.ativos.can_download_qrcodes %}
+                <a href="{% url 'qrcode_png' item.computador.id %}?size={{ qr_size }}">Baixar PNG</a>
+                <a href="{% url 'qrcode_pdf' item.computador.id %}">Baixar PDF</a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="panel empty-state qrcode-empty">Nenhum computador encontrado para gerar QR Code.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

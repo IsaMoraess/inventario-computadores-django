@@ -14,14 +14,16 @@
       </div>
 
       <div class="mapa-toolbar-actions">
-        <button
-          class="reposition-toggle"
-          id="repositionToggle"
-          type="button"
-          aria-pressed="false"
-        >
-          Modo reposicionar
-        </button>
+        {% if perms.ativos.can_reposition_computador %}
+          <button
+            class="reposition-toggle"
+            id="repositionToggle"
+            type="button"
+            aria-pressed="false"
+          >
+            Modo reposicionar
+          </button>
+        {% endif %}
 
         <div class="mapa-legend" aria-label="Legenda de status">
           <span><i class="legend-dot status-ativo"></i>Ativo</span>
@@ -113,7 +115,7 @@
             <img id="detailQrCode" alt="QR Code do computador">
           </div>
 
-          <a class="edit-button" id="detailEdit" href="#">Editar</a>
+          <a class="edit-button" id="detailEdit" href="#" {% if not perms.ativos.change_computador %}hidden{% endif %}>Editar</a>
         </div>
       </aside>
     </div>

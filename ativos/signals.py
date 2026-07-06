@@ -228,3 +228,17 @@ def registrar_save_planta(sender, instance, created, raw=False, **kwargs):
             valor_anterior=antigos.get('imagem', ''),
             valor_novo=instance.imagem.name,
         )
+
+    if antigos.get('ativa') != instance.ativa:
+        acao = 'Planta ativada' if instance.ativa else 'Planta desativada'
+        descricao = f'Planta {instance.nome} ativada.' if instance.ativa else f'Planta {instance.nome} desativada.'
+        registrar_movimentacao(
+            computador=None,
+            computador_identificador='PLANTA',
+            tipo_acao='planta',
+            acao=acao,
+            descricao=descricao,
+            campo='ativa',
+            valor_anterior=antigos.get('ativa', ''),
+            valor_novo=instance.ativa,
+        )

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Computador
+from .models import Computador, ConfiguracaoSistema, Planta
 
 
 class ComputadorForm(forms.ModelForm):
@@ -54,3 +54,92 @@ class ComputadorForm(forms.ModelForm):
             raise forms.ValidationError('Ja existe um computador com este ID.')
 
         return computador_id
+
+
+class PlantaForm(forms.ModelForm):
+    definir_ativa = forms.BooleanField(
+        label='Definir como planta ativa',
+        required=False,
+        initial=True,
+    )
+
+    class Meta:
+        model = Planta
+        fields = ['nome', 'imagem']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['nome'].required = True
+        self.fields['nome'].widget.attrs.update(
+            {
+                'class': 'form-control',
+                'placeholder': 'Planta principal',
+            }
+        )
+        self.fields['imagem'].widget.attrs.update(
+            {
+                'class': 'form-control',
+                'accept': '.png,.jpg,.jpeg,image/png,image/jpeg',
+            }
+        )
+        self.fields['definir_ativa'].widget.attrs['class'] = 'toggle-input'
+
+    def clean_imagem(self):
+        imagem = self.cleaned_data.get('imagem')
+
+        if not imagem:
+            raise forms.ValidationError('Selecione uma imagem da planta.')
+
+        extensao = imagem.name.rsplit('.', 1)[-1].lower() if '.' in imagem.name else ''
+        if extensao not in {'png', 'jpg', 'jpeg'}:
+            raise forms.ValidationError('Envie uma imagem PNG, JPG ou JPEG.')
+
+        content_type = getattr(imagem, 'content_type', '')
+        if content_type and content_type not in {'image/png', 'image/jpeg'}:
+            raise forms.ValidationError('O arquivo precisa ser uma imagem PNG, JPG ou JPEG.')
+
+        return imagem
+
+
+class ConfiguracaoSistemaForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoSistema
+        fields = [
+            'nome_empresa',
+            'logo',
+            'cor_principal',
+            'cor_secundaria',
+            'cor_cards',
+            'tema',
+            'rodape_pdfs',
+            'app_public_url',
+        ]
+        widgets = {
+            'cor_principal': forms.TextInput(attrs={'type': 'color'}),
+            'cor_secundaria': forms.TextInput(attrs={'type': 'color'}),
+            'cor_cards': forms.TextInput(attrs={'type': 'color'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        placeholders = {
+            'nome_empresa': 'JR Grupo',
+            'rodape_pdfs': 'JR Grupo - Gestao de Ativos de TI',
+            'app_public_url': 'https://inventario.jrgrupo.com.br',
+        }
+
+        for name, field in self.fields.items():
+            classes = ['form-control']
+            if isinstance(field.widget, forms.Select):
+                classes.append('form-select')
+            field.widget.attrs['class'] = ' '.join(classes)
+            if name in placeholders:
+                field.widget.attrs.setdefault('placeholder', placeholders[name])
+
+        self.fields['logo'].widget.attrs.update(
+            {
+                'accept': '.png,.jpg,.jpeg,image/png,image/jpeg',
+            }
+        )

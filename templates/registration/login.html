@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | Gestão de Ativos de TI</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>
+    :root {
+      --accent: {{ sistema_config.cor_principal|default:"#38bdf8" }};
+      --surface: {{ sistema_config.cor_cards|default:"#111925" }};
+      --surface-strong: {{ sistema_config.cor_secundaria|default:"#162234" }};
+    }
+  </style>
+</head>
+<body class="login-body theme-{{ sistema_config.tema|default:'escuro' }}">
+  <main class="login-page">
+    <section class="login-card">
+      <div class="login-brand">
+        {% if sistema_config.logo %}
+          <span class="brand-mark brand-logo"><img src="{{ sistema_config.logo.url }}" alt="{{ sistema_config.nome_empresa }}"></span>
+        {% else %}
+          <span class="brand-mark">JR</span>
+        {% endif %}
+        <div>
+          <span class="eyebrow">{{ sistema_config.nome_empresa|default:"JR Grupo" }}</span>
+          <h1>Gestão de Ativos de TI</h1>
+        </div>
+      </div>
+
+      <form method="post" class="login-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-field">
+          <label for="{{ form.username.id_for_label }}">Usuário</label>
+          {{ form.username }}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.password.id_for_label }}">Senha</label>
+          {{ form.password }}
+        </div>
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <button class="secondary-button primary-action" type="submit">Entrar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

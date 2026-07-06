@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="relatorios-page">
+    <div class="crud-header">
+      <div>
+        <span class="eyebrow">Relatorios</span>
+        <h2>Central de relatorios PDF</h2>
+        <p>Gere documentos profissionais para inventario, setores, alertas e historico.</p>
+      </div>
+      <div class="relatorio-header-actions">
+        <a class="secondary-button primary-action" href="{% url 'relatorio_excel' %}">Baixar Excel completo</a>
+        <a class="secondary-button" href="{% url 'dashboard' %}">Voltar ao dashboard</a>
+      </div>
+    </div>
+
+    <div class="relatorios-grid">
+      <article class="relatorio-card">
+        <div>
+          <span class="eyebrow">Inventario</span>
+          <h3>Relatorio geral</h3>
+          <p>Capa, resumo geral, status, salas, alertas, pendencias, tabela completa e ultimas movimentacoes.</p>
+        </div>
+        <a class="secondary-button primary-action" href="{% url 'relatorio_geral' %}">Baixar PDF</a>
+      </article>
+
+      <article class="relatorio-card">
+        <div>
+          <span class="eyebrow">Setor</span>
+          <h3>Relatorio por sala</h3>
+          <p>Documento filtrado por sala com resumo, status, alertas, pendencias e computadores do setor.</p>
+        </div>
+
+        <form class="relatorio-form" method="get" action="{% url 'relatorio_setor' %}">
+          <div class="filter-field">
+            <label for="sala">Sala</label>
+            <select id="sala" name="sala" required>
+              <option value="">Selecione</option>
+              {% for sala in salas %}
+                <option value="{{ sala }}">{{ sala }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="secondary-button primary-action" type="submit">Baixar PDF</button>
+        </form>
+      </article>
+
+      <article class="relatorio-card">
+        <div>
+          <span class="eyebrow">Alertas</span>
+          <h3>Relatorio de alertas</h3>
+          <p>Computadores em manutencao, desligados, com pouca RAM, dados pendentes ou sem usuario.</p>
+        </div>
+        <a class="secondary-button primary-action" href="{% url 'relatorio_alertas' %}">Baixar PDF</a>
+      </article>
+
+      <article class="relatorio-card">
+        <div>
+          <span class="eyebrow">Historico</span>
+          <h3>Movimentacoes</h3>
+          <p>Historico geral ou filtrado por computador e periodo.</p>
+        </div>
+
+        <form class="relatorio-form relatorio-form-grid" method="get" action="{% url 'relatorio_movimentacoes' %}">
+          <div class="filter-field">
+            <label for="computador">Computador</label>
+            <select id="computador" name="computador">
+              <option value="">Todos</option>
+              {% for computador in computadores %}
+                <option value="{{ computador }}">{{ computador }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="data_inicio">Inicio</label>
+            <input id="data_inicio" name="data_inicio" type="date">
+          </div>
+          <div class="filter-field">
+            <label for="data_fim">Fim</label>
+            <input id="data_fim" name="data_fim" type="date">
+          </div>
+          <button class="secondary-button primary-action" type="submit">Baixar PDF</button>
+        </form>
+      </article>
+    </div>
+  </section>
+{% endblock %}

@@ -204,7 +204,7 @@
     detailFields.placaVideo.textContent = valueOrDash(computador.placa_video);
     detailFields.x.textContent = valueOrDash(computador.x);
     detailFields.y.textContent = valueOrDash(computador.y);
-    detailFields.qrCode.src = computador.qr_code;
+    detailFields.qrCode.src = computador.qr_code_url || computador.qr_code || '';
     detailFields.edit.href = computador.edit_url;
   }
 

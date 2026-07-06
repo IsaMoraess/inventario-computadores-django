@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="plantas-page">
+    <div class="crud-header">
+      <div>
+        <span class="eyebrow">Plantas</span>
+        <h2>Gerenciar plantas</h2>
+        <p>Envie uma nova imagem da planta ou escolha qual planta cadastrada deve aparecer no mapa.</p>
+      </div>
+      <a class="secondary-button" href="{% url 'mapa' %}">Ver mapa</a>
+    </div>
+
+    <div class="plantas-alert">
+      Após trocar a planta, talvez seja necessário reposicionar os computadores.
+    </div>
+
+    <div class="plantas-layout">
+      <form class="panel planta-upload-form" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="upload">
+
+        <div class="panel-header">
+          <div>
+            <h2>Nova planta</h2>
+            <p>Formatos aceitos: PNG, JPG e JPEG.</p>
+          </div>
+        </div>
+
+        <div class="plantas-form-body">
+          {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form-field">
+            <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+            {{ form.nome }}
+            {% for error in form.nome.errors %}
+              <span class="field-error">{{ error }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ form.imagem.id_for_label }}">{{ form.imagem.label }}</label>
+            {{ form.imagem }}
+            {% for error in form.imagem.errors %}
+              <span class="field-error">{{ error }}</span>
+            {% endfor %}
+          </div>
+
+          <label class="toggle-field" for="{{ form.definir_ativa.id_for_label }}">
+            {{ form.definir_ativa }}
+            <span>{{ form.definir_ativa.label }}</span>
+          </label>
+
+          <button class="secondary-button primary-action" type="submit">Salvar planta</button>
+        </div>
+      </form>
+
+      <article class="panel plantas-list-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Plantas cadastradas</h2>
+            <p>{{ plantas|length }} planta(s) no sistema.</p>
+          </div>
+        </div>
+
+        <div class="plantas-grid">
+          {% for planta in plantas %}
+            <div class="planta-card {% if planta.ativa %}planta-card-active{% endif %}">
+              <div class="planta-preview">
+                {% if planta.imagem %}
+                  <img src="{{ planta.imagem.url }}" alt="{{ planta.nome }}">
+                {% else %}
+                  <span>Sem imagem</span>
+                {% endif %}
+              </div>
+
+              <div class="planta-card-body">
+                <div>
+                  <span class="eyebrow">Planta</span>
+                  <h3>{{ planta.nome }}</h3>
+                  <p>{{ planta.criada_em|date:"d/m/Y H:i" }}</p>
+                </div>
+
+                {% if planta.ativa %}
+                  <span class="status-pill status-ativo">Ativa</span>
+                {% else %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ativar">
+                    <input type="hidden" name="planta_id" value="{{ planta.pk }}">
+                    <button class="secondary-button" type="submit">Ativar</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state plantas-empty">Nenhuma planta cadastrada.</div>
+          {% endfor %}
+        </div>
+      </article>
+    </div>
+  </section>
+{% endblock %}

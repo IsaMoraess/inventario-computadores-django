@@ -8,7 +8,9 @@
         <h2>Computadores</h2>
         <p>{{ computadores|length }} computador(es) encontrados.</p>
       </div>
-      <a class="secondary-button primary-action" href="{% url 'computador_novo' %}">Novo computador</a>
+      {% if perms.ativos.add_computador %}
+        <a class="secondary-button primary-action" href="{% url 'computador_novo' %}">Novo computador</a>
+      {% endif %}
     </div>
 
     <form class="filter-panel" method="get">
@@ -81,8 +83,12 @@
                 <td>
                   <div class="row-actions">
                     <a href="{% url 'detalhe_computador' computador.id %}">Ver detalhes</a>
-                    <a href="{% url 'computador_editar' computador.id %}">Editar</a>
-                    <a class="danger-link" href="{% url 'computador_excluir' computador.id %}">Excluir</a>
+                    {% if perms.ativos.change_computador %}
+                      <a href="{% url 'computador_editar' computador.id %}">Editar</a>
+                    {% endif %}
+                    {% if perms.ativos.delete_computador %}
+                      <a class="danger-link" href="{% url 'computador_excluir' computador.id %}">Excluir</a>
+                    {% endif %}
                   </div>
                 </td>
               </tr>

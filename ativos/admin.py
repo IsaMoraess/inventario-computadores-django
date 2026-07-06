@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Computador, Movimentacao, Planta
+from .models import Computador, ConfiguracaoSistema, LogSistema, Movimentacao, Planta
 
 
 @admin.register(Computador)
@@ -69,3 +69,26 @@ class PlantaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'ativa', 'criada_em')
     search_fields = ('nome',)
     list_filter = ('ativa', 'criada_em')
+
+
+@admin.register(ConfiguracaoSistema)
+class ConfiguracaoSistemaAdmin(admin.ModelAdmin):
+    list_display = (
+        'nome_empresa',
+        'tema',
+        'app_public_url',
+        'ultima_sincronizacao',
+        'ultimo_backup',
+        'atualizado_em',
+    )
+
+    def has_add_permission(self, request):
+        return not ConfiguracaoSistema.objects.exists()
+
+
+@admin.register(LogSistema)
+class LogSistemaAdmin(admin.ModelAdmin):
+    list_display = ('data_hora', 'usuario', 'acao', 'resultado')
+    search_fields = ('usuario', 'acao', 'resultado')
+    list_filter = ('acao', 'data_hora')
+    readonly_fields = ('data_hora', 'usuario', 'acao', 'resultado')
