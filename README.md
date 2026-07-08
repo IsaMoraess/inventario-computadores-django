@@ -1,38 +1,77 @@
 # Gestão de Ativos de TI - v2
 
-Sistema web para gerenciamento de computadores, inventário de ativos e plantas interativas, desenvolvido em Django.
+Sistema web para gerenciamento de ativos de TI desenvolvido em **Django**, com foco em inventário de computadores, plantas interativas, QR Codes, relatórios e controle de movimentações.
 
-A aplicação permite controlar computadores, usuários, salas, movimentações, QR Codes, relatórios e mapas interativos em uma única plataforma.
+A aplicação foi criada para substituir uma versão anterior em Streamlit, oferecendo uma arquitetura mais robusta, escalável e adequada para ambientes corporativos.
 
 ---
 
-## Demonstração
+## Principais Funcionalidades
 
-### Dashboard
+- Dashboard com indicadores em tempo real
+- Mapa interativo da planta da empresa
+- Reposicionamento de computadores por Drag & Drop
+- CRUD completo de computadores
+- Página individual dos ativos
+- Histórico automático de movimentações
+- Upload e gerenciamento de plantas
+- Central de QR Codes
+- Relatórios em PDF
+- Exportação completa para Excel
+- Login e controle de permissões
+- Configurações do sistema
+- Integração com PostgreSQL (Supabase)
 
-> Estatísticas em tempo real do inventário.
+---
+
+## Tecnologias
+
+- Python
+- Django
+- PostgreSQL (Supabase)
+- HTML5
+- CSS3
+- JavaScript
+- Chart.js
+- ReportLab
+- OpenPyXL
+- Pillow
+- qrcode
+
+---
+
+# Módulos
+
+## Dashboard
+
+Painel principal contendo indicadores do inventário.
 
 - Total de computadores
 - Computadores ativos
+- Equipamentos em manutenção
 - Alertas
 - Gráficos
-- Histórico de movimentações
+- Histórico recente
 
 ---
 
-### Mapa Interativo
+## Mapa Interativo
+
+Visualização gráfica da planta da empresa.
+
+Funcionalidades:
 
 - Planta da empresa
 - Marcadores coloridos por status
-- Clique para visualizar o computador
-- Reposicionamento por arrastar e soltar
-- Salvamento automático no banco
+- Clique para visualizar detalhes
+- Drag & Drop para reposicionar ativos
+- Salvamento automático das coordenadas
 
 ---
 
-### Computadores
+## Computadores
 
-CRUD completo sem utilizar o Django Admin.
+CRUD completo desenvolvido em Django.
 
 - Cadastro
 - Edição
@@ -43,9 +82,9 @@ CRUD completo sem utilizar o Django Admin.
 
 ---
 
-### Histórico Automático
+## Histórico
 
-Todas as alterações são registradas automaticamente.
+Todas as alterações ficam registradas automaticamente.
 
 Exemplos:
 
@@ -58,41 +97,39 @@ Exemplos:
 
 ---
 
-### Plantas
+## Plantas
 
-Gerenciamento completo das plantas.
+Gerenciamento das plantas utilizadas pelo mapa.
 
 - Upload
-- Ativar/desativar
-- Troca automática da planta do mapa
+- Ativar/Desativar
+- Troca automática da planta ativa
 
 ---
 
-### QR Codes
+## QR Codes
 
-Central completa para geração de QR Codes.
+Central de geração de QR Codes.
 
+- QR individual
 - PNG
 - PDF
 - ZIP
 - Folha A4
 - Logo da empresa
-- QR individual
 
 ---
 
-### Relatórios
+## Relatórios
 
-Geração de relatórios profissionais.
+### PDF
 
-PDF
-
-- Inventário geral
-- Por setor
+- Inventário Geral
+- Por Setor
 - Alertas
 - Movimentações
 
-Excel
+### Excel
 
 - Resumo
 - Computadores
@@ -103,100 +140,63 @@ Excel
 
 ---
 
-### Configurações
+## Configurações
 
-Painel administrativo próprio.
+Painel administrativo do sistema.
 
-- Nome da empresa
+- Dados da empresa
 - Logo
-- Cores
 - Tema
 - Backup
+- Sincronização com Supabase
 - Logs
-- Exportações
 - Limpeza de cache
-- Sincronização com banco
 
 ---
 
-### Login e Permissões
+## Login e Permissões
 
-Perfis de acesso.
+Perfis de acesso:
 
 - Administrador
 - TI
 - Leitura
 
-Controle de permissões em todas as telas.
+Controle de acesso baseado em grupos do Django.
 
 ---
 
-## Tecnologias
+# Estrutura do Projeto
 
-- Python
-- Django
-- PostgreSQL (Supabase)
-- HTML
-- CSS
-- JavaScript
-- Chart.js
-- ReportLab
-- OpenPyXL
-- Pillow
-- qrcode
-
----
-
-## Funcionalidades
-
-- Dashboard
-- Inventário
-- CRUD completo
-- Mapa interativo
-- Drag and Drop
-- QR Codes
-- Histórico automático
-- Relatórios PDF
-- Relatórios Excel
-- Login
-- Permissões
-- Backup
-- Configurações
-- Logs
-- Responsivo
-
----
-
-## Estrutura
-
-```
+```text
 inventario-computadores-django/
-
-ativos/
-config/
-templates/
-static/
-media/
-manage.py
+│
+├── ativos/
+├── config/
+├── templates/
+├── static/
+├── media/
+├── manage.py
+└── requirements.txt
 ```
 
 ---
 
-## Como executar
+# Como executar
 
-Clone o projeto
+## Clonar o projeto
 
 ```bash
 git clone https://github.com/IsaMoraess/inventario-computadores-django.git
 ```
 
-Crie o ambiente virtual
+## Criar ambiente virtual
 
 ```bash
 python -m venv .venv
 ```
 
-Ative
+## Ativar
 
 Windows
 
@@ -204,19 +204,19 @@ Windows
 .venv\Scripts\activate
 ```
 
-Linux
+Linux/macOS
 
 ```bash
 source .venv/bin/activate
 ```
 
-Instale as dependências
+## Instalar dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Configure o arquivo `.env`
+## Configurar o arquivo `.env`
 
 ```env
 DATABASE_URL=...
@@ -225,19 +225,19 @@ DEBUG=True
 APP_PUBLIC_URL=http://localhost:8000
 ```
 
-Migrações
+## Aplicar migrações
 
 ```bash
 python manage.py migrate
 ```
 
-Criar grupos
+## Criar grupos padrão
 
 ```bash
 python manage.py criar_grupos_padrao
 ```
 
-Executar
+## Executar
 
 ```bash
 python manage.py runserver
@@ -245,29 +245,42 @@ python manage.py runserver
 
 ---
 
-## Roadmap
+# Roadmap
 
 - [x] Dashboard
 - [x] CRUD de computadores
 - [x] Mapa interativo
 - [x] Drag & Drop
 - [x] Histórico automático
-- [x] Plantas
+- [x] Upload de plantas
 - [x] QR Codes
 - [x] Relatórios PDF
-- [x] Relatórios Excel
-- [x] Login
-- [x] Permissões
-- [x] Configurações
+- [x] Exportação Excel
+- [x] Login e Permissões
+- [x] Configurações do sistema
 - [ ] API REST
 - [ ] Notificações
-- [ ] Inventário por dispositivos móveis
+- [ ] Inventário via dispositivos móveis
 
 ---
 
-## Autor
+# Próximas melhorias
+
+- API REST
+- Integração com dispositivos móveis
+- Inventário por leitura de QR Code
+- Dashboard em tempo real com WebSockets
+- Notificações automáticas
+- Auditoria avançada
+- Modo offline
+
+---
+
+# Autor
 
 **Isabelly Moraes**
+
+Desenvolvedora Python | Dados | Geoprocessamento
 
 GitHub:
 https://github.com/IsaMoraess
