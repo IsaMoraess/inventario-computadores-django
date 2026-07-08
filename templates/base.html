@@ -20,11 +20,9 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="{% url 'dashboard' %}" aria-label="Gestão de Ativos de TI">
-        {% if sistema_config.logo %}
-          <span class="brand-mark brand-logo"><img src="{{ sistema_config.logo.url }}" alt="{{ sistema_config.nome_empresa }}"></span>
-        {% else %}
-          <span class="brand-mark">JR</span>
-        {% endif %}
+        <span class="brand-mark brand-logo">
+          <img src="{{ sistema_logo_url }}" alt="{{ sistema_config.nome_empresa|default:'JR Grupo' }}">
+        </span>
         <span>
           <strong>Gestão de Ativos de TI</strong>
           <small>{{ sistema_config.nome_empresa|default:"JR Grupo" }}</small>

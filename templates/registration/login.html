@@ -18,11 +18,9 @@
   <main class="login-page">
     <section class="login-card">
       <div class="login-brand">
-        {% if sistema_config.logo %}
-          <span class="brand-mark brand-logo"><img src="{{ sistema_config.logo.url }}" alt="{{ sistema_config.nome_empresa }}"></span>
-        {% else %}
-          <span class="brand-mark">JR</span>
-        {% endif %}
+        <span class="brand-mark brand-logo">
+          <img src="{{ sistema_logo_url }}" alt="{{ sistema_config.nome_empresa|default:'JR Grupo' }}">
+        </span>
         <div>
           <span class="eyebrow">{{ sistema_config.nome_empresa|default:"JR Grupo" }}</span>
           <h1>Gestão de Ativos de TI</h1>

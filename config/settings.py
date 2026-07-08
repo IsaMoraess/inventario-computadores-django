@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
-from urllib.parse import parse_qsl, urlparse
+from urllib.parse import parse_qsl, unquote, urlparse
 
 from dotenv import load_dotenv
 
@@ -38,9 +38,9 @@ def database_url_config(database_url):
 
     return {
         'ENGINE': engine_by_scheme.get(parsed.scheme, parsed.scheme),
-        'NAME': parsed.path.lstrip('/'),
-        'USER': parsed.username or '',
-        'PASSWORD': parsed.password or '',
+        'NAME': unquote(parsed.path.lstrip('/')),
+        'USER': unquote(parsed.username or ''),
+        'PASSWORD': unquote(parsed.password or ''),
         'HOST': parsed.hostname or '',
         'PORT': parsed.port or '',
         'OPTIONS': dict(parse_qsl(parsed.query)),
@@ -160,13 +160,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 if (BASE_DIR / 'static').exists():
     STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 APP_PUBLIC_URL = os.getenv('APP_PUBLIC_URL', '').rstrip('/')

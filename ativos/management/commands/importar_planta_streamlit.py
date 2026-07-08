@@ -65,10 +65,9 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.WARNING(
-                    f'Arquivo informado nao encontrado, tentando GitHub: {origem}'
+                    f'Arquivo informado nao encontrado, procurando caminhos padrao: {origem}'
                 )
             )
-            return None
 
         for origem in self.caminhos_padrao():
             if origem.exists():
@@ -92,6 +91,16 @@ class Command(BaseCommand):
             home / 'Desktop' / repo_nome / arquivo,
             home / 'OneDrive' / 'Desktop' / repo_nome / arquivo,
             Path('C:/Users/isabelly/Desktop') / repo_nome / arquivo,
+            *[
+                perfil / 'Desktop' / repo_nome / arquivo
+                for perfil in Path('C:/Users').glob('*')
+                if perfil.is_dir()
+            ],
+            *[
+                perfil / 'OneDrive' / 'Desktop' / repo_nome / arquivo
+                for perfil in Path('C:/Users').glob('*')
+                if perfil.is_dir()
+            ],
         ]
 
     def copiar_imagem(self, origem, destino):

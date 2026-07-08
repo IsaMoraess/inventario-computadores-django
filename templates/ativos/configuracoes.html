@@ -21,9 +21,7 @@
             <span class="eyebrow">Dados da empresa</span>
             <h3>Identidade do sistema</h3>
           </div>
-          {% if configuracao.logo %}
-            <img class="config-logo-preview" src="{{ configuracao.logo.url }}" alt="{{ configuracao.nome_empresa }}">
-          {% endif %}
+          <img class="config-logo-preview" src="{{ sistema_logo_url }}" alt="{{ configuracao.nome_empresa|default:'JR Grupo' }}">
         </div>
 
         <form method="post" enctype="multipart/form-data" class="config-form">

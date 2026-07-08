@@ -7,10 +7,14 @@
 
   const chartData = JSON.parse(dataElement.textContent);
   const palette = ['#38bdf8', '#3ddc97', '#f8c14a', '#fb7185', '#a78bfa', '#60a5fa', '#f472b6', '#34d399'];
+  const isLightTheme = document.body.classList.contains('theme-claro');
+  const chartTextColor = isLightTheme ? '#33445a' : '#aebdd0';
+  const chartGridColor = isLightTheme ? 'rgba(15, 39, 66, 0.1)' : 'rgba(148, 163, 184, 0.12)';
+  const chartBorderColor = isLightTheme ? '#ffffff' : '#111925';
 
-  Chart.defaults.color = '#aebdd0';
+  Chart.defaults.color = chartTextColor;
   Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.18)';
+  Chart.defaults.borderColor = chartGridColor;
 
   function splitData(items) {
     return {
@@ -83,7 +87,7 @@
           data: current.values,
           ids: current.ids,
           backgroundColor: palette,
-          borderColor: '#111925',
+          borderColor: chartBorderColor,
           borderWidth: 3,
           hoverOffset: 6,
         }],
@@ -126,7 +130,7 @@
               precision: 0,
             },
             grid: {
-              color: 'rgba(148, 163, 184, 0.12)',
+              color: chartGridColor,
             },
           },
           y: {
@@ -135,7 +139,7 @@
               precision: 0,
             },
             grid: {
-              color: 'rgba(148, 163, 184, 0.08)',
+              color: isLightTheme ? 'rgba(15, 39, 66, 0.07)' : 'rgba(148, 163, 184, 0.08)',
             },
           },
         },
