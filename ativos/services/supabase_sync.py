@@ -1,10 +1,13 @@
 import json
+import logging
 
 from django.core.cache import cache
 from django.db import connection, transaction
 
 from ativos.models import Computador, Movimentacao
 
+
+logger = logging.getLogger(__name__)
 
 FONTE_OFICIAL = 'public.computadores'
 
@@ -207,6 +210,32 @@ def fetch_computadores_oficiais():
             dict(zip(column_names, row))
             for row in cursor.fetchall()
         ]
+
+
+def atualizar_posicao_supabase(computador_id, x, y):
+    if connection.vendor != 'postgresql':
+        # Sem base compartilhada com o Supabase (ex.: ambiente local em sqlite),
+        # nao ha nada para sincronizar e nao ha o que reportar como falha.
+        return True
+
+    ids_candidatos = [computador_id]
+    old_id = NEW_TO_OLD.get(computador_id)
+    if old_id:
+        ids_candidatos.append(old_id)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'UPDATE {FONTE_OFICIAL} SET x = %s, y = %s WHERE id = ANY(%s)',
+                [x, y, ids_candidatos],
+            )
+            return cursor.rowcount > 0
+    except Exception:
+        logger.exception(
+            'Falha ao sincronizar posicao do computador %s com o Supabase.',
+            computador_id,
+        )
+        return False
 
 
 def build_computer_data(registro, row_number, avisos):

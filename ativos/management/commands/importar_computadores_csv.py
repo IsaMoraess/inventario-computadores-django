@@ -70,6 +70,12 @@ class Command(BaseCommand):
                         continue
 
                     dados = self.build_computer_data(row, line_number)
+                    if Computador.objects.filter(pk=computador_id).exists():
+                        # Preserva a posicao definida manualmente no mapa; o CSV
+                        # so define x/y ao criar um computador novo.
+                        dados.pop('x', None)
+                        dados.pop('y', None)
+
                     _, created = Computador.objects.update_or_create(
                         id=computador_id,
                         defaults=dados,

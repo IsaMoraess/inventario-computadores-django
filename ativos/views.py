@@ -28,6 +28,7 @@ from .permissions import (
     login_and_permission,
 )
 from .services import configuracao_service, excel_service, qrcode_service, relatorio_service
+from .services.supabase_sync import atualizar_posicao_supabase
 from .services.inventario_metrics import (
     computadores_com_alerta,
     contar_status,
@@ -680,9 +681,12 @@ def api_reposicionar_computador(request, id):
     computador.y = y
     computador.save(update_fields=['x', 'y', 'atualizado_em'])
 
+    supabase_sincronizado = atualizar_posicao_supabase(computador.id, x, y)
+
     return JsonResponse(
         {
             'ok': True,
+            'supabase_sincronizado': supabase_sincronizado,
             'computador': {
                 'id': computador.id,
                 'x': computador.x,

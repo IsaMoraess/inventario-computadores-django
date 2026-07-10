@@ -37,6 +37,8 @@
   let repositionMode = false;
   let selectedComputerId = null;
   let activeDrag = null;
+  let imagemPronta = false;
+  let dadosProntos = false;
 
   function valueOrDash(value) {
     const normalized = String(value || '').trim();
@@ -240,7 +242,12 @@
       computador.y = data.computador.y;
       setMarkerCoordinates(marker, computador.x, computador.y);
       updatePositionDetails(computador);
-      showToast('Posicao salva com sucesso.', 'success');
+
+      if (data.supabase_sincronizado === false) {
+        showToast('Posicao salva localmente, mas nao sincronizada com o Supabase.', 'error');
+      } else {
+        showToast('Posicao salva com sucesso.', 'success');
+      }
     } catch (error) {
       computador.x = previousX;
       computador.y = previousY;
@@ -400,6 +407,12 @@
     positionMarkers();
   }
 
+  function tentarRenderizar() {
+    if (imagemPronta && dadosProntos) {
+      renderMarkers();
+    }
+  }
+
   async function loadComputadores() {
     const response = await fetch(apiUrl, {
       headers: {
@@ -413,7 +426,8 @@
 
     const data = await response.json();
     computadores = data.computadores || [];
-    renderMarkers();
+    dadosProntos = true;
+    tentarRenderizar();
   }
 
   if (repositionToggle) {
@@ -422,9 +436,17 @@
 
   if (image) {
     if (image.complete) {
-      renderMarkers();
+      imagemPronta = true;
+      tentarRenderizar();
     } else {
-      image.addEventListener('load', renderMarkers, { once: true });
+      image.addEventListener(
+        'load',
+        () => {
+          imagemPronta = true;
+          tentarRenderizar();
+        },
+        { once: true }
+      );
     }
   }
 

@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Computador, ConfiguracaoSistema, LogSistema, Movimentacao, Planta
+from .services.supabase_sync import atualizar_posicao_supabase
 
 
 @admin.register(Computador)
@@ -25,6 +26,37 @@ class ComputadorAdmin(admin.ModelAdmin):
         'observacoes',
     )
     list_filter = ('status', 'sala', 'sistema', 'criado_em', 'atualizado_em')
+    fields = (
+        'id',
+        'sala',
+        'status',
+        'usuario',
+        'sistema',
+        'ram',
+        'processador',
+        'armazenamento',
+        'placa_video',
+        'observacoes',
+        'x',
+        'y',
+    )
+    help_texts = {
+        'x': 'Posicao horizontal no mapa. Tambem sincronizada com o Supabase ao salvar. Prefira reposicionar pelo Mapa Interativo.',
+        'y': 'Posicao vertical no mapa. Tambem sincronizada com o Supabase ao salvar. Prefira reposicionar pelo Mapa Interativo.',
+    }
+
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['help_texts'] = self.help_texts
+        return super().get_form(request, obj, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        posicao_alterada = change and (
+            'x' in form.changed_data or 'y' in form.changed_data
+        )
+        super().save_model(request, obj, form, change)
+
+        if posicao_alterada:
+            atualizar_posicao_supabase(obj.id, obj.x, obj.y)
 
 
 @admin.register(Movimentacao)
